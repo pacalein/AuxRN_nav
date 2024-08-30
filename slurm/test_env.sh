@@ -29,16 +29,18 @@ fi
 
 echo "Docker existe y disponible ૮₍˶•⩊•˶₎ა"
 
-# Comando para ejecutar Docker y el script dentro del contenedor
-docker run --gpus '"device=0"' --privileged \
-    --mount type=bind,source=/home/fpcattan/.pyenv,target=/root/mount/.pyenv \
-    --mount type=bind,source=$MATTERPORT_DATA_DIR,target=/root/mount/Matterport3DSimulator/data/v1/scans \
-    --mount type=bind,source=/mnt/ialabnas2/homes/jdiazram/Matterport3DSimulator,target=/root/mount/Matterport3DSimulator \
-    --mount type=bind,source=/home/fpcattan/nas2_grima/AuxRN_nav,target=/root/mount/Matterport3DSimulator/AuxRN_nav \
-    mattersim:9.2-devel-ubuntu18.04 \
-    /bin/bash -c "
-    cd /root/mount/Matterport3DSimulator/AuxRN_nav &&
-    source ./init_env.sh &&
-    ./test2.py"
+# easy docker test
+# docker run hello-world
+
+docker run --name test_baseline_paca --gpus all \
+  --mount type=bind,source=/home/fpcattan/.pyenv,target=/root/mount/.pyenv \
+  --mount type=bind,source=/home/fpcattan/.pyenv/versions/3.6/envs/auxrn-env-3.6,target=/root/mount/.pyenv/versions/auxrn-env-3.6 \
+  --mount type=bind,source=$MATTERPORT_DATA_DIR,target=/root/mount/Matterport3DSimulator/data/v1/scans \
+  --mount type=bind,source=/mnt/ialabnas2/homes/jdiazram/Matterport3DSimulator,target=/root/mount/Matterport3DSimulator \
+  --mount type=bind,source=/home/fpcattan/nas2_grima/AuxRN_nav,target=/root/mount/Matterport3DSimulator/AuxRN_nav \
+  mattersim:9.2-devel-ubuntu18.04 \
+  /bin/bash -c "cd /root/mount/Matterport3DSimulator/AuxRN_nav && \
+  source ./init_pyenv_docker.sh &&\
+  ./test_docker_env.py"
 
 echo "Job $SLURM_JOBID terminado wi ฅ^._.^ฅ"

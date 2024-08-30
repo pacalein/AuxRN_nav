@@ -132,6 +132,9 @@ def train_speaker(train_env, tok, n_iters, log_every=500, val_envs={}):
 
 def train(train_env, tok, n_iters, log_every=100, val_envs={}, aug_env=None):
     writer = SummaryWriter(logdir=log_dir)
+    # listner es todo el paquete de modelos
+    # listner.models = (self.encoder, self.decoder, self.critic)
+    # listner.aux_models = (self.speaker_decoder, self.progress_indicator, self.matching_network, self.feature_predictor, self.angle_predictor)
     listner = Seq2SeqAgent(train_env, "", tok, args.maxAction)
 
     speaker = None
@@ -158,9 +161,9 @@ def train(train_env, tok, n_iters, log_every=100, val_envs={}, aug_env=None):
         else:
             print("LOAD THE listener from %s" % args.load)
             start_iter = listner.load(os.path.join(args.R2R_Aux_path, args.load))
-
+    # empieza el tiempo
     start = time.time()
-
+    # reset de valores de validacion
     best_val = {'val_seen': {"accu": 0., "state":"", 'update':False},
                 'val_unseen': {"accu": 0., "state":"", 'update':False}}
     if args.fast_train:
@@ -542,6 +545,7 @@ def train_val_augment():
     print("The training data_size is : %d" % train_env.size())
     print("The average instruction length of the dataset is %0.4f." % (stats['length']))
     print("The average action length of the dataset is %0.4f." % (stats['path']))
+    # augmented dataset?
     stats = aug_env.get_statistics()
     print("The augmentation data size is %d" % aug_env.size())
     print("The average instruction length of the dataset is %0.4f." % (stats['length']))

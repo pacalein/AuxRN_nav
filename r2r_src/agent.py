@@ -135,7 +135,8 @@ class Seq2SeqAgent(BaseAgent):
                 + list(self.feature_predictor.parameters())
                 + list(self.angle_predictor.parameters())
                 , lr=args.lr)
-        
+
+            # asocia los modelos con sus optimizadores
             self.all_tuple = [
                 ("encoder", self.encoder, self.encoder_optimizer),
                 ("decoder", self.decoder, self.decoder_optimizer),
@@ -302,7 +303,8 @@ class Seq2SeqAgent(BaseAgent):
                 assert select_candidate['viewpointId'] == \
                        self.env.env.sims[idx].getState().navigableLocations[select_candidate['idx']].viewpointId
                 take_action(i, idx, select_candidate['idx'])
-
+    
+    # esta es la funcion maestra que entrena realmente
     def rollout(self, train_ml=None, train_rl=True, reset=True, speaker=None):
         """
         :param train_ml:    The weight to train with maximum likelihood
@@ -346,6 +348,11 @@ class Seq2SeqAgent(BaseAgent):
         seq, seq_mask, seq_lengths, perm_idx = self._sort_batch(obs)
         perm_obs = obs[perm_idx]
 
+        # se pasan al encoder! se usa el metodo forward de la clase
+        # ctx: batch x seq_len x dim
+        # ctx_mask: batch x seq_len - indices to be masked
+        # c_0: batch x hidden_size
+        # h_0: batch x hidden_size
         ctx, h_t, c_t = self.encoder(seq, seq_lengths)
         ctx_mask = seq_mask
 
@@ -1096,7 +1103,8 @@ class Seq2SeqAgent(BaseAgent):
     def train(self, n_iters, feedback='teacher', **kwargs):
         ''' Train for a given number of iterations '''
         self.feedback = feedback
-
+        
+        # se ponen en modo train, viene de torch.nn.Module
         self.encoder.train()
         self.decoder.train()
         self.critic.train()
@@ -1111,6 +1119,7 @@ class Seq2SeqAgent(BaseAgent):
             self.loss = 0
             if feedback == 'teacher':
                 self.feedback = 'teacher'
+                # rollout es el que hace la pega de los datos y calcular losses
                 self.rollout(train_ml=args.teacher_weight, train_rl=False, **kwargs)
             elif feedback == 'sample':
                 if args.ml_weight != 0:
